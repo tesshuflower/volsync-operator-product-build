@@ -1,0 +1,12 @@
+[submodule "volsync"]
+	path = volsync
+	url = https://github.com/backube/volsync
+	branch = main
+[submodule "rclone"]
+	path = rclone
+	url = https://github.com/rclone/rclone
+	branch = v1.63-stable
+[submodule "syncthing"]
+	path = syncthing
+	url = https://github.com/syncthing/syncthing
+	branch = main
