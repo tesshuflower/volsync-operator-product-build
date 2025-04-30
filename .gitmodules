@@ -6,3 +6,7 @@
 	path = volsync
 	url = https://github.com/backube/volsync
 	branch = main
+[submodule "syncthing"]
+	path = syncthing
+	url = https://github.com/syncthing/syncthing
+	branch = main
