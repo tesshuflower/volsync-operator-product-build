@@ -1,0 +1,4 @@
+[submodule "rclone"]
+	path = rclone
+	url = https://github.com/rclone/rclone
+	branch = v1.63-stable
