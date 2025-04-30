@@ -10,3 +10,7 @@
 	path = syncthing
 	url = https://github.com/syncthing/syncthing
 	branch = main
+[submodule "diskrsync"]
+	path = diskrsync
+	url = https://github.com/dop251/diskrsync
+	branch = master
