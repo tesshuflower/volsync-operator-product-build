@@ -2,3 +2,7 @@
 	path = rclone
 	url = https://github.com/rclone/rclone
 	branch = v1.63-stable
+[submodule "volsync"]
+	path = volsync
+	url = https://github.com/backube/volsync
+	branch = main
