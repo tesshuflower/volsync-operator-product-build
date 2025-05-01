@@ -23,6 +23,8 @@ spec:
   - name: prefetch-input
     value:
     - {"type": "gomod", "path": "volsync/"}
+    - {"type": "gomod", "path": "volsync/mover-restic/restic"}
+    - {"type": "gomod", "path": "volsync/mover-restic/minio-go"}
     - {"type": "gomod", "path": "rclone/"}
     - {"type": "gomod", "path": "syncthing/"}
     - {"type": "gomod", "path": "diskrsync/"}
