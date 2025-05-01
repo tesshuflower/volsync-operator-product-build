@@ -25,10 +25,12 @@ spec:
     value:
     - {"type": "gomod", "path": "volsync/"}
     - {"type": "gomod", "path": "volsync/mover-restic/restic"}
+    #- {"type": "gomod", "path": "volsync/mover-restic/minio-go"}
     - {"type": "gomod", "path": "minio-go"}
     - {"type": "gomod", "path": "rclone/"}
     - {"type": "gomod", "path": "syncthing/"}
     - {"type": "gomod", "path": "diskrsync/"}
+    - {"type": "rpm", "path": "."}
   - name: git-url
     value: '{{source_url}}'
   - name: revision
@@ -200,6 +202,8 @@ spec:
         value: $(params.output-image).prefetch
       - name: ociArtifactExpiresAfter
         value: $(params.image-expires-after)
+      - name: dev-package-managers 
+        value: "true"
       runAfter:
       - clone-repository
       taskRef:
