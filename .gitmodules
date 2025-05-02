@@ -14,3 +14,7 @@
 	path = diskrsync
 	url = https://github.com/dop251/diskrsync
 	branch = master
+[submodule "drift-detection"]
+	path = drift-detection
+	url = https://github.com/arewm/drift-detection
+	branch = main

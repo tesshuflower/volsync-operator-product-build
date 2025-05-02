@@ -1,47 +1,6 @@
-# Based on volsync/Dockerfile
-
-######################################################################
-# Check that things are at the correct versions
-FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_9_1.23 AS dependency-checker
-
-WORKDIR /tmp
-
-# Check to see if we need to react to any upstream changes in volsync
-COPY drift-detection/detector.sh detector.sh
-COPY drift-cache/ drift-cache/
-COPY volsync/Dockerfile Dockerfile
-RUN ./detector.sh ./Dockerfile ./drift-cache/volsync/Dockerfile.cached
-
-# These should match the versions in the drift-cache/volsync/Dockerfile.cached
-ARG RCLONE_VERSION="v1.63.1"
-ARG RCLONE_GIT_HASH="bd1fbcae12f795f498c7ace6af9d9cc218102094"
-
-ARG SYNCTHING_VERSION="v1.29.5"
-ARG SYNCTHING_GIT_HASH="f0b666269b6bdd1e8000e56e421367260e807479"
-
-ARG DISKRSYNC_VERSION="v1.3.0"
-ARG DISKRSYNC_GIT_HASH="507805c4378495fc2267b77f6eab3d6bb318c86c"
-
-WORKDIR /src
-
-# Copy everything as git info for submodules is in the parent
-COPY . ./
-
-# Make sure we have the correct rclone release
-WORKDIR /src/rclone
-RUN /bin/bash -c "[[ $(git rev-list -n 1 HEAD) == ${RCLONE_GIT_HASH} ]]"
-
-# Make sure we have the correct Syncthing release
-WORKDIR /src/syncthing
-RUN /bin/bash -c "[[ $(git rev-list -n 1 HEAD) == ${SYNCTHING_GIT_HASH} ]]"
-
-# Make sure we have the correct diskrsync release
-WORKDIR /src/diskrsync
-RUN /bin/bash -c "[[ $(git rev-list -n 1 HEAD) == ${DISKRSYNC_GIT_HASH} ]]"
-
 ######################################################################
 # Establish a common builder image for all golang-based images
-FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_9_1.23 AS golang-builder
+FROM golang:1.23 AS golang-builder
 USER root
 WORKDIR /workspace
 # We don't vendor modules. Enforce that behavior
@@ -52,8 +11,6 @@ ARG TARGETOS
 ARG TARGETARCH
 ENV GOOS=${TARGETOS:-linux}
 ENV GOARCH=${TARGETARCH}
-ENV GOEXPERIMENT=strictfipsruntime
-ENV BUILD_TAGS="strictfipsruntime"
 
 
 ######################################################################
@@ -61,78 +18,79 @@ ENV BUILD_TAGS="strictfipsruntime"
 FROM golang-builder AS manager-builder
 
 # Copy the Go Modules manifests & download dependencies
-COPY volsync/go.mod go.mod
-COPY volsync/go.sum go.sum
+COPY go.mod go.mod
+COPY go.sum go.sum
 RUN go mod download
 
 # Copy the go source
-COPY volsync/cmd/ cmd/
-COPY volsync/api/ api/
-COPY volsync/internal/ internal/
+COPY cmd/ cmd/
+COPY api/ api/
+COPY internal/ internal/
 
 # Build
 ARG version_arg="(unknown)"
-ARG tags_arg=${BUILD_TAGS}
+ARG tags_arg=""
 RUN go build -a -o manager -ldflags "-X=main.volsyncVersion=${version_arg}" -tags "${tags_arg}" ./cmd/...
 
-# Verify that FIPS crypto libs are accessible
-RUN nm manager | grep -q "goboringcrypto\|golang-fips"
 
 ######################################################################
 # Build rclone
 FROM golang-builder AS rclone-builder
 
-COPY rclone/ rclone/
+ARG RCLONE_VERSION=v1.63.1
+ARG RCLONE_GIT_HASH=bd1fbcae12f795f498c7ace6af9d9cc218102094
+
+RUN git clone --depth 1 -b ${RCLONE_VERSION} https://github.com/rclone/rclone.git
 WORKDIR /workspace/rclone
 
-# Remove link flag that strips symbols so that we can verify crypto libs
-RUN sed -i 's/--ldflags "-s /--ldflags "/g' Makefile
+# Make sure the Rclone version tag matches the git hash we're expecting
+RUN /bin/bash -c "[[ $(git rev-list -n 1 HEAD) == ${RCLONE_GIT_HASH} ]]"
 
-RUN GOTAGS=${BUILD_TAGS} make rclone
+RUN make rclone
 
-# Verify that FIPS crypto libs are accessible
-RUN nm rclone | grep -q "goboringcrypto\|golang-fips"
 
 ######################################################################
 # Build restic
 FROM golang-builder AS restic-builder
 
-COPY volsync/mover-restic/restic ./restic
-COPY volsync/mover-restic/minio-go ./minio-go
+COPY /mover-restic/restic ./restic
+COPY /mover-restic/minio-go ./minio-go
 
 WORKDIR /workspace/restic
 
-# Preserve symbols so that we can verify crypto libs
-RUN sed -i 's/preserveSymbols := false/preserveSymbols := true/g' build.go
+RUN go run build.go --enable-cgo
 
-RUN go run build.go --enable-cgo --tags ${BUILD_TAGS}
-
-# Verify that FIPS crypto libs are accessible
-RUN nm restic | grep -q "goboringcrypto\|golang-fips"
 
 ######################################################################
 # Build syncthing
 FROM golang-builder AS syncthing-builder
 
-COPY syncthing/ syncthing/
+ARG SYNCTHING_VERSION="v1.29.5"
+ARG SYNCTHING_GIT_HASH="f0b666269b6bdd1e8000e56e421367260e807479"
+
+RUN git clone --depth 1 -b ${SYNCTHING_VERSION} https://github.com/syncthing/syncthing.git
 WORKDIR /workspace/syncthing
 
-RUN go run build.go -no-upgrade -tags ${BUILD_TAGS}
+# Make sure we have the correct Syncthing release
+RUN /bin/bash -c "[[ $(git rev-list -n 1 HEAD) == ${SYNCTHING_GIT_HASH} ]]"
 
-# Verify that FIPS crypto libs are accessible
-RUN nm bin/syncthing | grep -q "goboringcrypto\|golang-fips"
+RUN go run build.go -no-upgrade
+
 
 ######################################################################
 # Build diskrsync binary
 FROM golang-builder AS diskrsync-builder
 
-COPY diskrsync/ diskrsync/
+ARG DISKRSYNC_VERSION="v1.3.0"
+ARG DISKRSYNC_GIT_HASH="507805c4378495fc2267b77f6eab3d6bb318c86c"
+
+RUN git clone --depth 1 -b ${DISKRSYNC_VERSION} https://github.com/dop251/diskrsync.git
 WORKDIR /workspace/diskrsync
 
-RUN go build -a -o bin/diskrsync -tags ${BUILD_TAGS} ./diskrsync
+# Make sure we have the correct diskrsync release
+RUN /bin/bash -c "[[ $(git rev-list -n 1 HEAD) == ${DISKRSYNC_GIT_HASH} ]]"
 
-# Verify that FIPS crypto libs are accessible
-# RUN nm bin/diskrsync | grep -q "goboringcrypto\|golang-fips"
+RUN go build -a -o bin/diskrsync ./diskrsync
 
 
 ######################################################################
@@ -140,23 +98,20 @@ RUN go build -a -o bin/diskrsync -tags ${BUILD_TAGS} ./diskrsync
 FROM golang-builder AS diskrsync-tcp-builder
 
 # Copy the Go Modules manifests & download dependencies
-COPY volsync/go.mod go.mod
-COPY volsync/go.sum go.sum
+COPY go.mod go.mod
+COPY go.sum go.sum
 RUN go mod download
 
 # Copy the go source
-COPY volsync/diskrsync-tcp/ diskrsync-tcp/
+COPY diskrsync-tcp/ diskrsync-tcp/
 
 # Build
 ARG version_arg="(unknown)"
-RUN go build -a -o diskrsync-tcp/diskrsync-tcp -ldflags "-X=main.volsyncVersion=${version_arg}" -tags ${BUILD_TAGS} diskrsync-tcp/main.go
-
-# Verify that FIPS crypto libs are accessible
-RUN nm diskrsync-tcp/diskrsync-tcp | grep -q "goboringcrypto\|golang-fips"
+RUN go build -a -o diskrsync-tcp/diskrsync-tcp -ldflags "-X=main.volsyncVersion=${version_arg}" diskrsync-tcp/main.go
 
 ######################################################################
 # Final container
-FROM registry.redhat.io/ubi9/ubi-minimal:latest
+FROM registry.access.redhat.com/ubi9-minimal
 WORKDIR /
 
 RUN microdnf --refresh update -y && \
@@ -181,20 +136,20 @@ COPY --from=manager-builder /workspace/manager /manager
 
 ##### rclone
 COPY --from=rclone-builder /workspace/rclone/rclone /usr/local/bin/rclone
-COPY volsync/mover-rclone/active.sh \
+COPY /mover-rclone/active.sh \
      /mover-rclone/
 RUN chmod a+rx /mover-rclone/*.sh
 
 ##### restic
 COPY --from=restic-builder /workspace/restic/restic /usr/local/bin/restic
-COPY volsync/mover-restic/entry.sh \
+COPY /mover-restic/entry.sh \
      /mover-restic/
 RUN chmod a+rx /mover-restic/*.sh
 
 ##### rsync (ssh)
-COPY volsync/mover-rsync/source.sh \
-     volsync/mover-rsync/destination.sh \
-     volsync/mover-rsync/destination-command.sh \
+COPY /mover-rsync/source.sh \
+     /mover-rsync/destination.sh \
+     /mover-rsync/destination-command.sh \
      /mover-rsync/
 RUN chmod a+rx /mover-rsync/*.sh
 
@@ -219,21 +174,21 @@ RUN ln -s /keys/destination /etc/ssh/ssh_host_rsa_key && \
     sed -ir 's|^[#\s]*\(GSSAPIAuthentication\)\s.*$|\1 no|' "$INCLUDED_SSH_CONFIG_DIR"/*
 
 ##### rsync-tls
-COPY volsync/mover-rsync-tls/client.sh \
-     volsync/mover-rsync-tls/server.sh \
+COPY /mover-rsync-tls/client.sh \
+     /mover-rsync-tls/server.sh \
      /mover-rsync-tls/
 RUN chmod a+rx /mover-rsync-tls/*.sh
 
 ##### syncthing
 COPY --from=syncthing-builder /workspace/syncthing/bin/syncthing /usr/local/bin/syncthing
 ENV SYNCTHING_DATA_TRANSFERMODE="sendreceive"
-COPY volsync/mover-syncthing/config-template.xml \
+COPY /mover-syncthing/config-template.xml \
      /mover-syncthing/
 RUN chmod a+r /mover-syncthing/config-template.xml
 
-COPY volsync/mover-syncthing/config-template.xml \
-     volsync/mover-syncthing/stignore-template \
-     volsync/mover-syncthing/entry.sh \
+COPY /mover-syncthing/config-template.xml \
+     /mover-syncthing/stignore-template \
+     /mover-syncthing/entry.sh \
      /mover-syncthing/
 RUN chmod a+r /mover-syncthing/config-template.xml && \
     chmod a+r /mover-syncthing/stignore-template && \
@@ -252,7 +207,7 @@ ENV builddate="${builddate_arg}"
 ENV version="${version_arg}"
 
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md
-LABEL org.opencontainers.image.base.name="registry.redhat.io/ubi9/ubi-minimal"
+LABEL org.opencontainers.image.base.name="registry.access.redhat.com/ubi9-minimal"
 LABEL org.opencontainers.image.created="${builddate}"
 LABEL org.opencontainers.image.description="VolSync data replication operator"
 LABEL org.opencontainers.image.documentation="https://volsync.readthedocs.io/"
@@ -262,8 +217,5 @@ LABEL org.opencontainers.image.source="https://github.com/backube/volsync"
 LABEL org.opencontainers.image.title="VolSync"
 LABEL org.opencontainers.image.vendor="Backube"
 LABEL org.opencontainers.image.version="${version}"
-
-# uid/gid: nobody/nobody
-USER 65534:65534
 
 ENTRYPOINT [ "/bin/bash" ]
