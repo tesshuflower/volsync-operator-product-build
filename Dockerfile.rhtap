@@ -82,15 +82,8 @@ RUN nm manager | grep -q "goboringcrypto\|golang-fips"
 # Build rclone
 FROM golang-builder AS rclone-builder
 
-#ARG RCLONE_VERSION=v1.63.1
-#ARG RCLONE_GIT_HASH=bd1fbcae12f795f498c7ace6af9d9cc218102094
-
-#RUN git clone --depth 1 -b ${RCLONE_VERSION} https://github.com/rclone/rclone.git
 COPY rclone/ rclone/
 WORKDIR /workspace/rclone
-
-# Make sure the Rclone version tag matches the git hash we're expecting
-#RUN /bin/bash -c "[[ $(git rev-list -n 1 HEAD) == ${RCLONE_GIT_HASH} ]]"
 
 # Remove link flag that strips symbols so that we can verify crypto libs
 RUN sed -i 's/--ldflags "-s /--ldflags "/g' Makefile
@@ -121,18 +114,8 @@ RUN nm restic | grep -q "goboringcrypto\|golang-fips"
 # Build syncthing
 FROM golang-builder AS syncthing-builder
 
-#ARG SYNCTHING_VERSION="v1.29.5"
-#ARG SYNCTHING_GIT_HASH="f0b666269b6bdd1e8000e56e421367260e807479"
-
-#RUN git clone --depth 1 -b ${SYNCTHING_VERSION} https://github.com/syncthing/syncthing.git
 COPY syncthing/ syncthing/
 WORKDIR /workspace/syncthing
-
-#FIXME: remove
-RUN /bin/bash -c "ls -al"
-
-# Make sure we have the correct Syncthing release
-#RUN /bin/bash -c "[[ $(git rev-list -n 1 HEAD) == ${SYNCTHING_GIT_HASH} ]]"
 
 RUN go run build.go -no-upgrade -tags ${BUILD_TAGS}
 
@@ -143,18 +126,8 @@ RUN nm bin/syncthing | grep -q "goboringcrypto\|golang-fips"
 # Build diskrsync binary
 FROM golang-builder AS diskrsync-builder
 
-#ARG DISKRSYNC_VERSION="v1.3.0"
-#ARG DISKRSYNC_GIT_HASH="507805c4378495fc2267b77f6eab3d6bb318c86c"
-
-#RUN git clone --depth 1 -b ${DISKRSYNC_VERSION} https://github.com/dop251/diskrsync.git
 COPY diskrsync/ diskrsync/
 WORKDIR /workspace/diskrsync
-
-#FIXME: remove
-RUN /bin/bash -c "ls -al"
-
-# Make sure we have the correct diskrsync release
-#RUN /bin/bash -c "[[ $(git rev-list -n 1 HEAD) == ${DISKRSYNC_GIT_HASH} ]]"
 
 RUN go build -a -o bin/diskrsync -tags ${BUILD_TAGS} ./diskrsync
 
