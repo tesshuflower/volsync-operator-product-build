@@ -30,6 +30,8 @@ spec:
     - {"type": "gomod", "path": "syncthing/"}
     - {"type": "gomod", "path": "diskrsync/"}
     - {"type": "rpm", "path": "."}
+  - name: build-source-image
+    value: "true"
   - name: git-url
     value: '{{source_url}}'
   - name: revision
