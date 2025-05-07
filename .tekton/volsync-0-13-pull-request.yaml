@@ -15,6 +15,9 @@ metadata:
       ".tekton/volsync-0-13-push.yaml".pathChanged() ||
       "Dockerfile.rhtap".pathChanged() ||
       "volsync".pathChanged() ||
+      "rclone".pathChanged() ||
+      "syncthing".pathChanged() ||
+      "diskrsync".pathChanged() ||
       "rpms.in.yaml".pathChanged() ||
       "rpms.lock.yaml".pathChanged())
   creationTimestamp: null
