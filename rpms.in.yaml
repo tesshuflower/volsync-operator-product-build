@@ -5,6 +5,7 @@ contentOrigin:
     - repoid: ubi-9-for-${basearch}-appstream-rpms
       baseurl: https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi9/9/${basearch}/appstream/os/
 packages:
+  # For Volsync final image (see Dockerfile.rhtap)
   - acl
   - openssh
   - openssh-clients
@@ -15,6 +16,10 @@ packages:
   - vim-minimal
   - tar
   - rsync
+  # For building the bundle image (see bundle.Dockerfile.rhtap)
+  - jq
+  - python3
+  - python3-pip
 context:
   containerfile: Dockerfile.rhtap
 arches:
