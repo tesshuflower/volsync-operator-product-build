@@ -7,7 +7,7 @@ export SUPPORTED_OCP_VERSIONS="v4.12-v4.20"
 
 # Related images - will need to be kept updated with latest via component nudges
 # See https://konflux.pages.redhat.com/docs/users/building/component-nudges.html
-export VOLSYNC_IMAGE_PULLSPEC="quay.io/redhat-user-workloads/volsync-tenant/volsync-0-13:32dd3dfbb582f00c2f6d83dff18d8b4304f9d5b2"
+export VOLSYNC_IMAGE_PULLSPEC="quay.io/redhat-user-workloads/volsync-tenant/volsync-0-13@sha256:ca9c83753f32868ea30cc8a2c1b68096dbfb67da1ded57a3813b065372c71dc5"
 
 export OSE_KUBE_RBAC_PROXY_IMAGE_PULLSPEC="registry.redhat.io/openshift4/ose-kube-rbac-proxy-rhel9:v4.17"
 
@@ -39,8 +39,6 @@ fi
 #   exit 2
 #fi
 
-## get the required environment variables that are set when merging change sets
-# FIXME: may need to set some vars that were in render_vars (like SUPPORTED_OCP_VERSIONS)
 #source render_vars
 
 ## Check for environment variables pertaining to images
