@@ -73,6 +73,7 @@ LABEL com.redhat.component="volsync-operator-bundle-container" \
       io.openshift.expose-services="" \
       io.openshift.tags="data,images" \
       io.k8s.display-name="volsync-operator-bundle" \
+      io.k8s.description="Asynchronous volume replication for Kubernetes CSI storage." \
       maintainer="['acm-component-maintainers@redhat.com']" \
       description="volsync-operator-bundle" \
       vendor="Red Hat, Inc."
