@@ -68,7 +68,7 @@ LABEL com.redhat.delivery.operator.bundle=true \
 
 LABEL com.redhat.component="volsync-operator-bundle-container" \
       name="rhacm2/volsync-operator-bundle" \
-      version="${VERSION}" \
+      version="v${VERSION}" \
       summary="volsync-operator-bundle" \
       io.openshift.expose-services="" \
       io.openshift.tags="data,images" \

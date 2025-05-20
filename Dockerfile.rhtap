@@ -253,7 +253,7 @@ ENV VERSION="${ARG_VERSION}"
 
 LABEL com.redhat.component="volsync-container" \
       name="rhacm2/volsync-rhel9" \
-      version="${VERSION}" \
+      version="v${VERSION}" \
       summary="volsync" \
       io.openshift.expose-services="" \
       io.openshift.tags="data,images" \
