@@ -32,6 +32,8 @@ spec:
     value:
     - {"type": "rpm", "path": "."}
     - {"type": "pip", "path": "."}
+  - name: build-args-file
+    value: "rhtap-buildargs.conf"
   - name: build-source-image
     value: "true"
   - name: git-url

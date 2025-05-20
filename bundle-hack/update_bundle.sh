@@ -2,18 +2,6 @@
 
 # Originally from cpaas build render_templates file
 
-export VERSION=0.13.0
-export SUPPORTED_OCP_VERSIONS="v4.12-v4.20"
-
-# Related images - will need to be kept updated with latest via component nudges
-# See https://konflux.pages.redhat.com/docs/users/building/component-nudges.html
-export VOLSYNC_IMAGE_PULLSPEC="quay.io/redhat-user-workloads/volsync-tenant/volsync-0-13@sha256:ca9c83753f32868ea30cc8a2c1b68096dbfb67da1ded57a3813b065372c71dc5"
-
-export OSE_KUBE_RBAC_PROXY_IMAGE_PULLSPEC="registry.redhat.io/openshift4/ose-kube-rbac-proxy-rhel9:v4.17"
-
-# ACM 2.14 doclink
-export ACM_DOCLINK = "https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.14/html/business_continuity/business-cont-overview#volsync"
-
 export MANIFESTS_DIR=/manifests
 export METADATA_DIR=/metadata
 export CSV_NAME="volsync.clusterserviceversion.yaml"
@@ -21,6 +9,19 @@ export CSV_FILE="${MANIFESTS_DIR}/${CSV_NAME}"
 
 set -x
 env
+
+# Check for needed env vars - these are set from rhtap-buildargs.conf
+if [[ -z "$VERSION" ]] ||
+   [[ -z "$VOLSYNC_IMAGE_PULLSPEC" ]] ||
+   [[ -z "$OSE_KUBE_RBAC_PROXY_IMAGE_PULLSPEC" ]] ||
+   [[ -z "$ACM_DOCLINK" ]]; then
+  echo "ERROR: All required environment variables not loaded"
+  echo "    VERSION"
+  echo "    VOLSYNC_IMAGE_PULLSPEC"
+  echo "    OSE_KUBE_RBAC_PROXY_IMAGE_PULLSPEC"
+  echo "    ACM_DOCLINK"
+  exit 2
+fi
 
 # Check the version we're trying to build matches volsync
 vs_version=$(cat /tmp/version.mk | grep "^VERSION :=")
@@ -221,16 +222,16 @@ dump_manifest(os.getenv('TARGET_CSV_FILE'), volsync_csv)
 CSV_UPDATE
 
 # Add OCP annotations
-python3 - << END
-import os, yaml
-with open(os.getenv('METADATA_DIR') + "/annotations.yaml", 'r') as f:
-    y=yaml.safe_load(f) or {}
-    y['annotations']['com.redhat.delivery.operator.bundle'] = True
-    y['annotations']['com.redhat.openshift.versions'] = os.getenv('SUPPORTED_OCP_VERSIONS')
-    y['annotations']['com.redhat.delivery.backport'] = False
-with open(os.getenv('METADATA_DIR') + "/annotations.yaml", 'w') as f:
-    yaml.dump(y, f)
-END
+#python3 - << END
+#import os, yaml
+#with open(os.getenv('METADATA_DIR') + "/annotations.yaml", 'r') as f:
+#    y=yaml.safe_load(f) or {}
+#    y['annotations']['com.redhat.delivery.operator.bundle'] = True
+#    y['annotations']['com.redhat.openshift.versions'] = os.getenv('SUPPORTED_OCP_VERSIONS')
+#    y['annotations']['com.redhat.delivery.backport'] = False
+#with open(os.getenv('METADATA_DIR') + "/annotations.yaml", 'w') as f:
+#    yaml.dump(y, f)
+#END
 
 cat ${TARGET_CSV_FILE}
 

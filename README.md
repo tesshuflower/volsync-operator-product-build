@@ -25,3 +25,22 @@ Or, after cloning the repo you can do this to pull the submodules:
 cd volsync-operator-product-build
 git submodule update --init --recursive
 ```
+
+## Building locally
+
+To build locally and simulate/exercise what the konflux build will do, you can do the following:
+
+
+Build the volsync container
+
+```bash
+podman build --build-arg-file rhtap-buildargs.conf -f Dockerfile.rhtap -t volsync-container:local-build-latest .
+```
+
+Build the volsync bundle (this may fail because of cachi env cmd in the dockerfile, so you may need 
+to manually edit the bundle.Dockerfile.rhtap)
+
+
+```bash
+podman build --build-arg-file rhtap-buildargs.conf -f bundle.Dockerfile.rhtap -t volsync-bundle:local-build-latest .
+```
