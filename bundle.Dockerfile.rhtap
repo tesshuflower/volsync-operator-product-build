@@ -76,7 +76,11 @@ LABEL com.redhat.component="volsync-operator-bundle-container" \
       io.k8s.description="Asynchronous volume replication for Kubernetes CSI storage." \
       maintainer="['acm-component-maintainers@redhat.com']" \
       description="volsync-operator-bundle" \
-      vendor="Red Hat, Inc."
+      vendor="Red Hat, Inc." \
+      #TODO: Should these be set here?
+      url="https://access.redhat.com/containers/#/registry.access.redhat.com/rhacm2/volsync-operator-bundle/images/v0.13.0" \
+      release="2" \
+      distribution-scope="public"
 
 # Copy files to locations specified by labels.
 COPY --from=builder /manifests /manifests/
