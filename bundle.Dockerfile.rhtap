@@ -7,6 +7,23 @@ RUN . /cachi2/cachi2.env && pip3 install /cachi2/output/deps/pip/ruamel.yaml-0.1
 # Use a new stage to enable caching of the package installations for local development
 FROM builder-runner AS builder
 
+# Args are set in rhtap-buildargs.conf file
+# set args as env vars which will be used by update_bundle.sh
+ARG ARG_VERSION
+ENV VERSION="${ARG_VERSION}"
+
+ARG ARG_SUPPORTED_OCP_VERSIONS
+ENV SUPPORTED_OCP_VERSIONS="${ARG_SUPPORTED_OCP_VERSIONS}"
+
+ARG ARG_VOLSYNC_IMAGE_PULLSPEC
+ENV VOLSYNC_IMAGE_PULLSPEC="${ARG_VOLSYNC_IMAGE_PULLSPEC}"
+
+ARG ARG_OSE_KUBE_RBAC_PROXY_IMAGE_PULLSPEC
+ENV OSE_KUBE_RBAC_PROXY_IMAGE_PULLSPEC="${ARG_OSE_KUBE_RBAC_PROXY_IMAGE_PULLSPEC}"
+
+ARG ARG_ACM_DOCLINK
+ENV ACM_DOCLINK="${ARG_ACM_DOCLINK}"
+
 COPY bundle-hack .
 COPY volsync/bundle/manifests /manifests/
 COPY volsync/bundle/metadata /metadata/
@@ -20,8 +37,15 @@ RUN ./update_bundle.sh
 # Final bundle image
 FROM scratch
 
-#TODO: update labels
-# Core bundle labels.
+ARG ARG_VERSION
+ENV VERSION="${ARG_VERSION}"
+
+ARG ARG_SUPPORTED_OCP_VERSIONS
+ENV SUPPORTED_OCP_VERSIONS="${ARG_SUPPORTED_OCP_VERSIONS}"
+
+#
+# Core bundle labels - these should match volsync/bundle/metadata/annotations.yaml
+#
 LABEL operators.operatorframework.io.bundle.mediatype.v1=registry+v1
 LABEL operators.operatorframework.io.bundle.manifests.v1=manifests/
 LABEL operators.operatorframework.io.bundle.metadata.v1=metadata/
@@ -32,9 +56,31 @@ LABEL operators.operatorframework.io.metrics.builder=operator-sdk-v1.33.0
 LABEL operators.operatorframework.io.metrics.mediatype.v1=metrics+v1
 LABEL operators.operatorframework.io.metrics.project_layout=go.kubebuilder.io/v4
 
-# Labels for testing.
 LABEL operators.operatorframework.io.test.mediatype.v1=scorecard+v1
 LABEL operators.operatorframework.io.test.config.v1=tests/scorecard/
+
+#
+# RH Labels
+#
+LABEL com.redhat.delivery.operator.bundle=true \
+      com.redhat.openshift.versions="${SUPPORTED_OCP_VERSIONS}" \
+      com.redhat.delivery.backport=false
+
+LABEL com.redhat.component="volsync-operator-bundle-container" \
+      name="rhacm2/volsync-operator-bundle" \
+      version="v${VERSION}" \
+      summary="volsync-operator-bundle" \
+      io.openshift.expose-services="" \
+      io.openshift.tags="data,images" \
+      io.k8s.display-name="volsync-operator-bundle" \
+      io.k8s.description="Asynchronous volume replication for Kubernetes CSI storage." \
+      maintainer="['acm-component-maintainers@redhat.com']" \
+      description="volsync-operator-bundle" \
+      vendor="Red Hat, Inc." \
+      #TODO: Should these be set here?
+      url="https://access.redhat.com/containers/#/registry.access.redhat.com/rhacm2/volsync-operator-bundle/images/v0.13.0" \
+      release="2" \
+      distribution-scope="public"
 
 # Copy files to locations specified by labels.
 COPY --from=builder /manifests /manifests/

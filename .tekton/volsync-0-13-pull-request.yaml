@@ -40,6 +40,8 @@ spec:
     - {"type": "gomod", "path": "syncthing/"}
     - {"type": "gomod", "path": "diskrsync/"}
     - {"type": "rpm", "path": "."}
+  - name: build-args-file
+    value: "rhtap-buildargs.conf"
   - name: build-source-image
     value: "true"
   - name: git-url

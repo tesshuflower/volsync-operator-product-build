@@ -13,14 +13,14 @@ COPY volsync/Dockerfile Dockerfile
 RUN ./detector.sh ./Dockerfile ./drift-cache/volsync/Dockerfile.cached
 
 # These should match the versions in the drift-cache/volsync/Dockerfile.cached
-ARG RCLONE_VERSION="v1.63.1"
-ARG RCLONE_GIT_HASH="bd1fbcae12f795f498c7ace6af9d9cc218102094"
+ARG ARG_RCLONE_VERSION
+ARG ARG_RCLONE_GIT_HASH
 
-ARG SYNCTHING_VERSION="v1.29.5"
-ARG SYNCTHING_GIT_HASH="f0b666269b6bdd1e8000e56e421367260e807479"
+ARG ARG_SYNCTHING_VERSION
+ARG ARG_SYNCTHING_GIT_HASH
 
-ARG DISKRSYNC_VERSION="v1.3.0"
-ARG DISKRSYNC_GIT_HASH="507805c4378495fc2267b77f6eab3d6bb318c86c"
+ARG ARG_DISKRSYNC_VERSION
+ARG ARG_DISKRSYNC_GIT_HASH
 
 WORKDIR /src
 
@@ -29,15 +29,15 @@ COPY . ./
 
 # Make sure we have the correct rclone release
 WORKDIR /src/rclone
-RUN /bin/bash -c "[[ $(git rev-list -n 1 HEAD) == ${RCLONE_GIT_HASH} ]]"
+RUN /bin/bash -c "[[ $(git rev-list -n 1 HEAD) == ${ARG_RCLONE_GIT_HASH} ]]"
 
 # Make sure we have the correct Syncthing release
 WORKDIR /src/syncthing
-RUN /bin/bash -c "[[ $(git rev-list -n 1 HEAD) == ${SYNCTHING_GIT_HASH} ]]"
+RUN /bin/bash -c "[[ $(git rev-list -n 1 HEAD) == ${ARG_SYNCTHING_GIT_HASH} ]]"
 
 # Make sure we have the correct diskrsync release
 WORKDIR /src/diskrsync
-RUN /bin/bash -c "[[ $(git rev-list -n 1 HEAD) == ${DISKRSYNC_GIT_HASH} ]]"
+RUN /bin/bash -c "[[ $(git rev-list -n 1 HEAD) == ${ARG_DISKRSYNC_GIT_HASH} ]]"
 
 ######################################################################
 # Establish a common builder image for all golang-based images
@@ -71,7 +71,7 @@ COPY volsync/api/ api/
 COPY volsync/internal/ internal/
 
 # Build
-ARG version_arg="(unknown)"
+ARG ARG_VERSION="(unknown)"
 ARG tags_arg=${BUILD_TAGS}
 RUN go build -a -o manager -ldflags "-X=main.volsyncVersion=${version_arg}" -tags "${tags_arg}" ./cmd/...
 
@@ -148,7 +148,7 @@ RUN go mod download
 COPY volsync/diskrsync-tcp/ diskrsync-tcp/
 
 # Build
-ARG version_arg="(unknown)"
+ARG ARG_VERSION="(unknown)"
 RUN go build -a -o diskrsync-tcp/diskrsync-tcp -ldflags "-X=main.volsyncVersion=${version_arg}" -tags ${BUILD_TAGS} diskrsync-tcp/main.go
 
 # Verify that FIPS crypto libs are accessible
@@ -246,22 +246,27 @@ COPY --from=diskrsync-builder /workspace/diskrsync/bin/diskrsync /usr/local/bin/
 COPY --from=diskrsync-tcp-builder /workspace/diskrsync-tcp/diskrsync-tcp /diskrsync-tcp
 
 ##### Set build metadata
-ARG builddate_arg="(unknown)"
-ARG version_arg="(unknown)"
-ENV builddate="${builddate_arg}"
-ENV version="${version_arg}"
+#ARG builddate_arg="(unknown)"
+#ENV builddate="${builddate_arg}"
+ARG ARG_VERSION="(unknown)"
+ENV VERSION="${ARG_VERSION}"
 
-# https://github.com/opencontainers/image-spec/blob/main/annotations.md
-LABEL org.opencontainers.image.base.name="registry.redhat.io/ubi9/ubi-minimal"
-LABEL org.opencontainers.image.created="${builddate}"
-LABEL org.opencontainers.image.description="VolSync data replication operator"
-LABEL org.opencontainers.image.documentation="https://volsync.readthedocs.io/"
-LABEL org.opencontainers.image.licenses="AGPL-3.0-or-later"
-LABEL org.opencontainers.image.revision="${version}"
-LABEL org.opencontainers.image.source="https://github.com/backube/volsync"
-LABEL org.opencontainers.image.title="VolSync"
-LABEL org.opencontainers.image.vendor="Backube"
-LABEL org.opencontainers.image.version="${version}"
+LABEL com.redhat.component="volsync-container" \
+      name="rhacm2/volsync-rhel9" \
+      version="v${VERSION}" \
+      summary="volsync" \
+      io.openshift.expose-services="" \
+      io.openshift.tags="data,images" \
+      io.k8s.display-name="volsync" \
+      io.k8s.description="Asynchronous volume replication for Kubernetes CSI storage." \
+      maintainer="['acm-component-maintainers@redhat.com']" \
+      description="volsync" \
+      vendor="Red Hat, Inc." \
+      #TODO: Should these be set here?
+      url="https://access.redhat.com/containers/#/registry.access.redhat.com/rhacm2/volsync-rhel9/images/v0.13.0" \
+      release="5" \
+      distribution-scope="public"
+
 
 # uid/gid: nobody/nobody
 USER 65534:65534
