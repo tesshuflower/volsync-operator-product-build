@@ -2,7 +2,7 @@ apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   annotations:
-    build.appstudio.openshift.io/build-nudge-files: ".*Dockerfile.*, .*.yaml, .*Containerfile.*, .*update_bundle.sh"
+    build.appstudio.openshift.io/build-nudge-files: "rhtap-buildargs.conf"
     build.appstudio.openshift.io/repo: https://github.com/stolostron/volsync-operator-product-build?rev={{revision}}
     build.appstudio.redhat.com/commit_sha: '{{revision}}'
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
