@@ -263,8 +263,8 @@ LABEL com.redhat.component="volsync-container" \
       description="volsync" \
       vendor="Red Hat, Inc." \
       #TODO: Should these be set here?
-      url="https://access.redhat.com/containers/#/registry.access.redhat.com/rhacm2/volsync-rhel9/images/v0.13.0" \
-      release="5" \
+      url="https://github.com/stolostron/volsync-operator-product-build" \
+      release="0" \
       distribution-scope="public"
 
 
