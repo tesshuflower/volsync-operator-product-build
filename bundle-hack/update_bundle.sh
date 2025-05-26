@@ -181,6 +181,9 @@ volsync_csv['metadata']['annotations']['features.operators.openshift.io/tls-prof
 volsync_csv['metadata']['annotations']['features.operators.openshift.io/token-auth-aws'] = 'false'
 volsync_csv['metadata']['annotations']['features.operators.openshift.io/token-auth-azure'] = 'false'
 volsync_csv['metadata']['annotations']['features.operators.openshift.io/token-auth-gcp'] = 'false'
+volsync_csv['metadata']['annotations']['features.operators.openshift.io/cnf'] = 'false'
+volsync_csv['metadata']['annotations']['features.operators.openshift.io/cni'] = 'false'
+volsync_csv['metadata']['annotations']['features.operators.openshift.io/csi'] = 'false'
 volsync_csv['metadata']['annotations']['operators.openshift.io/valid-subscription'] = '["OpenShift Platform Plus", "Red Hat Advanced Cluster Management for Kubernetes"]'
 volsync_csv['metadata']['annotations']['repository'] = 'https://github.com/backube/volsync'
 volsync_csv['metadata']['annotations']['containerImage'] = os.getenv('VOLSYNC_IMAGE_PULLSPEC', '')

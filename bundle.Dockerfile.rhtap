@@ -78,8 +78,8 @@ LABEL com.redhat.component="volsync-operator-bundle-container" \
       description="volsync-operator-bundle" \
       vendor="Red Hat, Inc." \
       #TODO: Should these be set here?
-      url="https://access.redhat.com/containers/#/registry.access.redhat.com/rhacm2/volsync-operator-bundle/images/v0.13.0" \
-      release="2" \
+      url="https://github.com/stolostron/volsync-operator-product-build" \
+      release="0" \
       distribution-scope="public"
 
 # Copy files to locations specified by labels.
