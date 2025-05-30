@@ -12,12 +12,12 @@ env
 
 # Check for needed env vars - these are set from rhtap-buildargs.conf
 if [[ -z "$VERSION" ]] ||
-   [[ -z "$VOLSYNC_IMAGE_PULLSPEC" ]] ||
+   [[ -z "$STAGE_VOLSYNC_IMAGE_PULLSPEC" ]] ||
    [[ -z "$OSE_KUBE_RBAC_PROXY_IMAGE_PULLSPEC" ]] ||
    [[ -z "$ACM_DOCLINK" ]]; then
   echo "ERROR: All required environment variables not loaded"
   echo "    VERSION"
-  echo "    VOLSYNC_IMAGE_PULLSPEC"
+  echo "    STAGE_VOLSYNC_IMAGE_PULLSPEC"
   echo "    OSE_KUBE_RBAC_PROXY_IMAGE_PULLSPEC"
   echo "    ACM_DOCLINK"
   exit 2
@@ -109,6 +109,10 @@ fi
 # VOLSYNC_IMAGE_PULLSPEC : quay.io/backube/volsync:latest
 
 #export VOLSYNC_IMAGE_PULLSPEC=$(echo ${VOLSYNC_VOLSYNC_BUILD_INFO_JSON} | python3 -c 'import json,sys;obj=json.load(sys.stdin);print(obj["extra"]["image"]["index"]["pull"][1])')
+
+
+# Update img reference to final registry.redhat.io location
+VOLSYNC_IMAGE_PULLSPEC="registry.redhat.io/rhacm2/volsync-rhel9@${STAGE_VOLSYNC_IMAGE_PULLSPEC##*@}"
 
 if [ ! -f "${CSV_FILE}" ]; then
    echo "CSV file not found, the version or name might have changed on us!"
