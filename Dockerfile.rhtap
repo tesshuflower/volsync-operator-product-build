@@ -1,7 +1,7 @@
 # Based on volsync/Dockerfile
 
 ######################################################################
-# Check that things are at the correct versions
+# Check that submodules for movers are at the correct versions
 FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_9_1.23 AS dep-checker-and-golang-builder
 
 WORKDIR /tmp
