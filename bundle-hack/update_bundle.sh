@@ -228,46 +228,4 @@ volsync_csv['spec']['version'] = volsync_csv['spec']['version'] = upstream_versi
 dump_manifest(os.getenv('TARGET_CSV_FILE'), volsync_csv)
 CSV_UPDATE
 
-# Add OCP annotations
-#python3 - << END
-#import os, yaml
-#with open(os.getenv('METADATA_DIR') + "/annotations.yaml", 'r') as f:
-#    y=yaml.safe_load(f) or {}
-#    y['annotations']['com.redhat.delivery.operator.bundle'] = True
-#    y['annotations']['com.redhat.openshift.versions'] = os.getenv('SUPPORTED_OCP_VERSIONS')
-#    y['annotations']['com.redhat.delivery.backport'] = False
-#with open(os.getenv('METADATA_DIR') + "/annotations.yaml", 'w') as f:
-#    yaml.dump(y, f)
-#END
-
 cat ${TARGET_CSV_FILE}
-
-## Fetch additional Labels
-#label_lines="./tmp.label-lines"
-## Bundle-image format requires some image labels which mirror those we've already
-## generated (upstream) as metadata/annotations.yaml, including stuff that relates
-## to publication channels. To avoid manual maintenance of stuff downstream, convert
-## metadata/annotations.yaml into LABELS. So we:
-##
-## - Filter out the "annotations:" line
-## - Convert all others to LABEL statement
-#tail -n +2 "${METADATA_DIR}/annotations.yaml" | \
-#  sed "s/: */=/" | sed "s/^ */LABEL /" >> "$label_lines"
-#
-## Write labels to Dockerfile
-## But first, stash off the base Dockerfile so that we have a clean one to ammend
-#df="./Dockerfile"
-#df_stash="./Dockerfile.stashed"
-#if [[ ! -f $df_stash ]]; then
-#  cp $df $df_stash
-#fi
-#cp $df_stash $df
-#
-#cat "$df" |\
-#  sed "/com.redhat.delivery.operator.bundle=true/r $label_lines" |
-#  sed "0,/com.redhat.delivery.operator.bundle=true/{//d;}" > "./df.upd.tmp"
-#mv -f "./df.upd.tmp" "$df"
-#rm -f "$label_lines"
-#
-## Done with the script repo, remove so it doesn't get committed into dist-git.
-#rm -rf $script_target_dir
