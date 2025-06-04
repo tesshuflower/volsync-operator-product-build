@@ -9,5 +9,14 @@
     "syncthing",
     "diskrsync"
   ],
-  "dependencyDashboard": true
+  "dependencyDashboard": true,
+  "dockerfile": {
+    "fileMatch": [
+      "Dockerrfile.rhtap",
+      "bundle.Dockerrfile.rhtap"
+    ]
+  },
+  "git-submodules": {
+    "schedule": ["at any time"]
+  },
 }
