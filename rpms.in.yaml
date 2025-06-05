@@ -16,10 +16,6 @@ packages:
   - vim-minimal
   - tar
   - rsync
-  # For building the bundle image (see bundle.Dockerfile.rhtap)
-  - jq
-  - python3
-  - python3-pip
 context:
   containerfile: Dockerfile.rhtap
 arches:

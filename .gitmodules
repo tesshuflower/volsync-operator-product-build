@@ -18,3 +18,6 @@
 	path = drift-detection
 	url = https://github.com/arewm/drift-detection
 	branch = main
+[submodule "yq"]
+	path = yq
+	url = https://github.com/mikefarah/yq
