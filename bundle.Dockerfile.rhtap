@@ -1,6 +1,7 @@
 # Based on ./volsync/bundle.Dockerfile
-# Run public golang builder just for yq (used for editing csv yaml)
-FROM golang:1.24 as builder-runner
+FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:rhel_9_1.23 AS builder-runner
+
+ENV GOFLAGS=-mod=readonly
 
 # Build yq for editing the CSV yaml
 COPY yq/ yq/
