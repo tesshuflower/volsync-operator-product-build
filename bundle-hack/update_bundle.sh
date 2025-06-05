@@ -141,7 +141,7 @@ export CSV_NAME="volsync-product.v${VERSION}"
 # Update description, name, version and doclink
 yq -i '
   .spec.description += strenv(CSV_DESCRIPTION) |
-  .metadata.name = strenv(CSV_NAME}" |
+  .metadata.name = strenv(CSV_NAME) |
   .spec.version = strenv(VERSION) |
   (.spec.links[] | select(.name == "Documentation") | .url) = strenv(ACM_DOCLINK)
 ' "${TARGET_CSV_FILE}"
