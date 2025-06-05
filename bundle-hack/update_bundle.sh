@@ -51,8 +51,8 @@ yq --version
 # as this is no longer used as of version 0.2.0.
 sed -i \
   -e "s|quay.io/backube/volsync:latest|${VOLSYNC_IMAGE_PULLSPEC}|g" \
-  -e 's|gcr.io/kubebuilder/kube-rbac-proxy:.*$|${OSE_KUBE_RBAC_PROXY_IMAGE_PULLSPEC}|g' \
-  -e 's|quay.io/brancz/kube-rbac-proxy:.*$|${OSE_KUBE_RBAC_PROXY_IMAGE_PULLSPEC}|g' \
+  -e "s|gcr.io/kubebuilder/kube-rbac-proxy:.*$|${OSE_KUBE_RBAC_PROXY_IMAGE_PULLSPEC}|g" \
+  -e "s|quay.io/brancz/kube-rbac-proxy:.*$|${OSE_KUBE_RBAC_PROXY_IMAGE_PULLSPEC}|g" \
   "${CSV_FILE}"
 
 # Convert volsync name to volsync-product in files
