@@ -7,7 +7,7 @@
   ],
   "updateNotScheduled": true,
   "ignorePaths": [
-    "drift-cache/**"
+    "**/drift-cache/**"
   ],
   "ignoreDeps": [
     "rclone",
