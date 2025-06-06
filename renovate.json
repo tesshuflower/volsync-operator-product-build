@@ -2,6 +2,9 @@
   "extends": [
     "github>konflux-ci/mintmaker//config/renovate/renovate.json"
   ],
+  "baseBranches": [
+    "main"
+  ],
   "updateNotScheduled": true,
   "ignorePaths": [
     "drift-cache/**"
