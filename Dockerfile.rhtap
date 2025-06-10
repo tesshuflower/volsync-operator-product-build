@@ -39,6 +39,10 @@ RUN /bin/bash -c "[[ $(git rev-list -n 1 HEAD) == ${ARG_SYNCTHING_GIT_HASH} ]]"
 WORKDIR /src/diskrsync
 RUN /bin/bash -c "[[ $(git rev-list -n 1 HEAD) == ${ARG_DISKRSYNC_GIT_HASH} ]]"
 
+# Get VolSync git hash and save to file
+WORKDIR /src/volsync
+RUN /bin/bash -c "git rev-parse --short HEAD > /tmp/volsync-commit.txt"
+
 ######################################################################
 # Establish a common builder image for all golang-based images
 FROM dep-checker-and-golang-builder AS golang-builder
@@ -73,7 +77,7 @@ COPY volsync/internal/ internal/
 # Build
 ARG ARG_VERSION="(unknown)"
 ARG tags_arg=${BUILD_TAGS}
-RUN go build -a -o manager -ldflags "-X=main.volsyncVersion=${version_arg}" -tags "${tags_arg}" ./cmd/...
+RUN export VOLSYNC_BUILD_VERSION="v${ARG_VERSION}-$(cat /tmp/volsync-commit.txt)"; go build -a -o manager -ldflags "-X=main.volsyncVersion=${VOLSYNC_BUILD_VERSION}" -tags "${tags_arg}" ./cmd/...
 
 # Verify that FIPS crypto libs are accessible
 RUN nm manager | grep -q "goboringcrypto\|golang-fips"
