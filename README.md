@@ -28,6 +28,21 @@ cd volsync-operator-product-build
 git submodule update --init --recursive
 ```
 
+## Updating
+
+Submodules such as rclone, syncthing, diskrsync should not be updated unless the corresponding update is made in
+volsync itself.
+
+When the volsync submodule is updated, the Dockerfile will need to be copied to [Dockerfile.cached](drift-cache/volsync/Dockerfile.cached).
+The volsync build (building Dockerfile.rhtap) will fail if the Dockerfile.cached doesn't match the one in volsync.  Not matching
+is usually an indicator something like one of the other submodules was updated.
+
+If another submodule (rclone, syncthing, diskrsync) needs an update, make sure to update the proper GIT hashes in
+[rhtap-buildargs.conf](rhtap-buildargs.conf).
+
+The [rhtap-buildargs.conf](rhtap-buildargs.confg) file is also used during the bundle build and will contain the
+volsync image SHA to be packaged in the bundle image.  Konflux nudges from the volsync component should keep this up-to-date.
+
 ## Building locally
 
 To build locally and simulate/exercise what the konflux build will do, you can do the following:
