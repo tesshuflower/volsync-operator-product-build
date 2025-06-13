@@ -3,7 +3,8 @@
     "github>konflux-ci/mintmaker//config/renovate/renovate.json"
   ],
   "baseBranches": [
-    "main"
+    "main",
+    "release-0.13"
   ],
   "updateNotScheduled": true,
   "ignorePaths": [

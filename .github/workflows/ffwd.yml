@@ -8,7 +8,7 @@ on: # yamllint disable-line rule:truthy
   workflow_dispatch:
 
 env:
-  FFWD_RELEASE_BRANCH: "release-0.13" # set to "" to skip ffwding from main to this branch
+  FFWD_RELEASE_BRANCH: "" # set to "" to skip ffwding from main to this branch
 
 jobs:
   # This job is to optionally ffwd the main branch to a release branch
