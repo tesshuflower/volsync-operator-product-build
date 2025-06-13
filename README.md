@@ -3,6 +3,10 @@ VolSync Operator Product Build to build downstream VolSync via Konflux
 
 ## Getting Started
 
+The main branch for this repo contains the renovate config [renovate.json](renovate.json) used by renovate for all branches.
+Look at the release-X.Y branches for configuration related to building the related X.Y release downstream
+of VolSync via konflux.
+
 This repo contains submodules in order to have all the dependencies
 to build the VolSync Operator.
 
@@ -14,6 +18,8 @@ Current submodules:
 - [diskrsync](diskrsync) - points to https://github.com/dop251/diskrsync
 - [yq](yq) - points to https://github.com/mikefarah/yq - This submodule is only needed for editing the CSV yaml
  with custom edits for Red Hat in bundle-hack/update-bundle.sh during the bundle build
+- [drift-detection](drift-detection) - points to  https://github.com/arewm/drift-detection - This submodule is only
+  needed for the bundle generation and detecting if volsync has diverged from our config.
 
 To clone this repo and submodules it can be done in one step with:
 
