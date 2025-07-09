@@ -1,0 +1,15 @@
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Release
+metadata:
+  name: stage-publish-volsync-0-13-0-rc0-1
+  namespace: volsync-tenant
+  labels:
+    release.appstudio.openshift.io/author: "tflower"
+spec:
+  snapshot: "volsync-0-13-zxm7f"
+  releasePlan: volsync-release-plan-stage-0-13
+  data:
+    releaseNotes:
+      type: RHEA
+      references:
+        - https://access.redhat.com/security/updates/classification/#important
